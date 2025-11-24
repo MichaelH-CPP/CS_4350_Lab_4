@@ -1,0 +1,9 @@
+{
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.referencedLibraries": [
+        "c:\\Users\\micha\\OneDrive - Cal Poly Pomona\\Fall 2025\\CS 4350 - 01\\Lab 4\\Lab 4 Code\\lib\\mysql-connector-j-9.5.0.jar",
+        "c:\\Users\\micha\\OneDrive - Cal Poly Pomona\\Fall 2025\\CS 4350 - 01\\Lab 4\\Lab 4 Code\\lib\\protobuf-java-4.31.1.jar"
+    ]
+}
