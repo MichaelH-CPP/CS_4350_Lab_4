@@ -1,5 +1,7 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Statement;
+import java.sql.ResultSet;
 import java.util.Scanner;
 
 public class lab_4 {
@@ -7,17 +9,26 @@ public class lab_4 {
 
     public static void printMenu() {
         System.out.println(
-                "Choose an option from below (1-5): \n1. Display Schedule \n2. Edit Drivers \n3.Edit Busses\n 4. Edit Trips \n 5. Quit");
+                "Choose an option from below (1-5): \n1. Display Schedule \n2. Edit Drivers \n3.Edit Busses \n4. Edit Trips \n5. Quit");
     }
 
-    public static void displaySchedule() {
+    public static void displaySchedule(Connection con) throws Exception {
         System.out.println(
                 "\nDisplay Schedule: \n1. See all trips for certain Starting Location (provide Starting Location, Destination, and Date) \n2. Show stops of certain trip (provide Trip Number) \n3. See weekly schedule (provide Driver and Date) \n4. Quit");
-
         int choice = sc.nextInt();
+        sc.nextLine();
+        Statement st = con.createStatement();
 
         switch (choice) {
             case 1:
+                System.out.print("Enter the starting location: ");
+                String startLoc = sc.nextLine();
+                System.out.print("Enter the destination: ");
+                String dest = sc.nextLine();
+                System.out.print("Enter the date: ");
+                String date = sc.nextLine();
+                // ResultSet rs = st.executeQuery("SELECT * FROM...");
+
                 break;
 
             case 2:
@@ -31,11 +42,11 @@ public class lab_4 {
 
             default:
                 System.out.println("\nInvalid Choice. Select an option between 1-4.");
-                displaySchedule();
+                displaySchedule(con);
         }
     }
 
-    public static void editDrivers() {
+    public static void editDrivers(Connection con) throws Exception {
         System.out.println(
                 "\nEdit Drivers: \n1. Add a driver \n2. Change driver for trip (provide Trip Number) \n3. Delete driver \n4. Quit");
         int choice = sc.nextInt();
@@ -52,11 +63,11 @@ public class lab_4 {
 
             default:
                 System.out.println("\nInvalid Choice. Select an option between 1-3.");
-                editDrivers();
+                editDrivers(con);
         }
     }
 
-    public static void editBusses() {
+    public static void editBusses(Connection con) throws Exception {
         System.out.println(
                 "\nEdit Busses: \n1. Add a bus \n2. Change bus for trip (provide Trip Number) \n3. Delete bus \n4. Quit");
         int choice = sc.nextInt();
@@ -73,11 +84,11 @@ public class lab_4 {
 
             default:
                 System.out.println("\nInvalid Choice. Select an option between 1-3.");
-                editBusses();
+                editBusses(con);
         }
     }
 
-    public static void editTrips() {
+    public static void editTrips(Connection con) throws Exception {
         System.out.println("\nEdit Trips: \n1. Add Trip Offering(s) \n2. Delete Trip Offering");
         int choice = sc.nextInt();
 
@@ -90,7 +101,7 @@ public class lab_4 {
 
             default:
                 System.out.println("\nInvalid Choice. Select an option between 1-2.");
-                editTrips();
+                editTrips(con);
         }
     }
 
@@ -106,16 +117,16 @@ public class lab_4 {
 
             switch (option) {
                 case 1:
-                    displaySchedule();
+                    displaySchedule(con);
                     break;
                 case 2:
-                    editDrivers();
+                    editDrivers(con);
                     break;
                 case 3:
-                    editBusses();
+                    editBusses(con);
                     break;
                 case 4:
-                    editTrips();
+                    editTrips(con);
                 case 5:
                     break;
                 default:
