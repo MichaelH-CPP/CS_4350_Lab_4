@@ -3,6 +3,7 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.util.Scanner;
+import java.time.LocalDate;
 
 public class lab_4 {
     public static Scanner sc = new Scanner(System.in);
@@ -20,29 +21,104 @@ public class lab_4 {
         Statement st = con.createStatement();
 
         switch (choice) {
-            case 1:
+            case 1: {
                 System.out.print("Enter the starting location: ");
                 String startLoc = sc.nextLine();
                 System.out.print("Enter the destination: ");
                 String dest = sc.nextLine();
                 System.out.print("Enter the date: ");
                 String date = sc.nextLine();
-                // ResultSet rs = st.executeQuery("SELECT * FROM...");
+                ResultSet rs = st.executeQuery(String.format(
+                        """
+                                    SELECT
+                                            t.StartLocationName,
+                                            t.DestinationName,
+                                            o.Date,
+                                            o.ScheduledStartTime,
+                                            o.SecheduledArrivalTime,
+                                            o.DriverName,
+                                            o.BusID
+                                        FROM Trip AS t
+                                        JOIN TripOffering AS o
+                                            ON t.TripNumber = o.TripNumber
+                                        WHERE t.StartLocationName = '%s'
+                                            AND t.DestinationName   = '%s'
+                                            AND o.Date              = '%s';
+                                """, startLoc, dest, date));
+                while (rs.next()) {
+                    System.out.printf(
+                            "%s -> %s on %s | %s - %s | Driver: %s | Bus: %s%n",
+                            rs.getString("StartLocationName"),
+                            rs.getString("DestinationName"),
+                            rs.getString("Date"),
+                            rs.getString("ScheduledStartTime"),
+                            rs.getString("SecheduledArrivalTime"),
+                            rs.getString("DriverName"),
+                            rs.getString("BusID"));
+                }
 
                 break;
+            }
 
-            case 2:
+            case 2: {
+                System.out.print("Enter the TripNumber: ");
+                int tripNum = sc.nextInt();
+                ResultSet rs = st.executeQuery(String.format(
+                        "SELECT t.StopNumber, s.StopAddress FROM TripStopInfo as t JOIN TripStop AS s ON t.StopNumber = s.StopNumber WHERE t.TripNumber = %d ORDER BY StopNumber ASC",
+                        tripNum));
+                while (rs.next()) {
+                    System.out.printf("Stop #%d: %s%n", rs.getInt("StopNumber"), rs.getString("StopAddress"));
+                }
+                sc.nextLine();
+
                 break;
+            }
 
-            case 3:
+            case 3: {
+                System.out.print("Enter the driver name: ");
+                String driver = sc.nextLine();
+
+                System.out.print("Enter the starting date (YYYY-MM-DD): ");
+                String startDateStr = sc.nextLine();
+
+                LocalDate startDate = LocalDate.parse(startDateStr);
+                LocalDate endDate = startDate.plusDays(6);
+                String endDateStr = endDate.toString();
+
+                ResultSet rs = st.executeQuery(String.format(
+                        """
+                                SELECT
+                                    TripNumber,
+                                    Date,
+                                    ScheduledStartTime,
+                                    SecheduledArrivalTime,
+                                    BusID
+                                FROM TripOffering
+                                WHERE DriverName = '%s'
+                                AND Date BETWEEN '%s' AND '%s'
+                                ORDER BY Date, ScheduledStartTime
+                                """,
+                        driver, startDateStr, endDateStr));
+
+                while (rs.next()) {
+                    System.out.printf(
+                            "Date: %s | Trip: %d | %s - %s | Bus: %s%n",
+                            rs.getString("Date"),
+                            rs.getInt("TripNumber"),
+                            rs.getString("ScheduledStartTime"),
+                            rs.getString("SecheduledArrivalTime"),
+                            rs.getString("BusID"));
+                }
+
                 break;
-
+            }
             case 4:
-                break;
+                return;
 
-            default:
+            default: {
                 System.out.println("\nInvalid Choice. Select an option between 1-4.");
                 displaySchedule(con);
+            }
         }
     }
 
@@ -52,18 +128,21 @@ public class lab_4 {
         int choice = sc.nextInt();
 
         switch (choice) {
-            case 1:
+            case 1: {
                 break;
+            }
 
-            case 2:
+            case 2: {
                 break;
+            }
 
-            case 3:
+            case 3: {
                 break;
-
-            default:
+            }
+            default: {
                 System.out.println("\nInvalid Choice. Select an option between 1-3.");
                 editDrivers(con);
+            }
         }
     }
 
@@ -73,18 +152,19 @@ public class lab_4 {
         int choice = sc.nextInt();
 
         switch (choice) {
-            case 1:
+            case 1: {
                 break;
-
-            case 2:
+            }
+            case 2: {
                 break;
-
-            case 3:
+            }
+            case 3: {
                 break;
-
-            default:
+            }
+            default: {
                 System.out.println("\nInvalid Choice. Select an option between 1-3.");
                 editBusses(con);
+            }
         }
     }
 
@@ -93,15 +173,16 @@ public class lab_4 {
         int choice = sc.nextInt();
 
         switch (choice) {
-            case 1:
+            case 1: {
                 break;
-
-            case 2:
+            }
+            case 2: {
                 break;
-
-            default:
+            }
+            default: {
                 System.out.println("\nInvalid Choice. Select an option between 1-2.");
                 editTrips(con);
+            }
         }
     }
 
@@ -114,6 +195,7 @@ public class lab_4 {
         do {
             printMenu();
             option = sc.nextInt();
+            sc.nextLine();
 
             switch (option) {
                 case 1:
@@ -127,11 +209,11 @@ public class lab_4 {
                     break;
                 case 4:
                     editTrips(con);
+                    break;
                 case 5:
                     break;
                 default:
                     System.out.println("Invalid Option, choose between 1-5.\n");
-                    continue;
             }
         } while (option != 6);
 
