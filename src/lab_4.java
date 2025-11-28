@@ -4,6 +4,7 @@ import java.sql.Statement;
 import java.sql.ResultSet;
 import java.util.Scanner;
 import java.time.LocalDate;
+import java.lang.String;
 
 public class lab_4 {
     public static Scanner sc = new Scanner(System.in);
@@ -45,6 +46,10 @@ public class lab_4 {
                                             AND t.DestinationName   = '%s'
                                             AND o.Date              = '%s';
                                 """, startLoc, dest, date));
+                if (!rs.next()) {
+                    System.out.println("No trips were found.\n");
+                    return;
+                }
                 while (rs.next()) {
                     System.out.printf(
                             "%s -> %s on %s | %s - %s | Driver: %s | Bus: %s%n",
@@ -66,6 +71,10 @@ public class lab_4 {
                 ResultSet rs = st.executeQuery(String.format(
                         "SELECT t.StopNumber, s.StopAddress FROM TripStopInfo as t JOIN TripStop AS s ON t.StopNumber = s.StopNumber WHERE t.TripNumber = %d ORDER BY StopNumber ASC",
                         tripNum));
+                if (!rs.next()) {
+                    System.out.println("No trips were found.\n");
+                    return;
+                }
                 while (rs.next()) {
                     System.out.printf("Stop #%d: %s%n", rs.getInt("StopNumber"), rs.getString("StopAddress"));
                 }
@@ -100,6 +109,11 @@ public class lab_4 {
                                 """,
                         driver, startDateStr, endDateStr));
 
+                if (!rs.next()) {
+                    System.out.println("No trips were found.\n");
+                    return;
+                }
+
                 while (rs.next()) {
                     System.out.printf(
                             "Date: %s | Trip: %d | %s - %s | Bus: %s%n",
@@ -129,6 +143,7 @@ public class lab_4 {
 
         switch (choice) {
             case 1: {
+
                 break;
             }
 
@@ -150,12 +165,28 @@ public class lab_4 {
         System.out.println(
                 "\nEdit Busses: \n1. Add a bus \n2. Change bus for trip (provide Trip Number) \n3. Delete bus \n4. Quit");
         int choice = sc.nextInt();
+        Statement st = con.createStatement();
 
         switch (choice) {
             case 1: {
-                break;
+                System.out.print("Enter the Bus ID: ");
+                int busID = sc.nextInt();
+                System.out.print("Enter the Bus Year: ");
+                int busYear = sc.nextInt();
+                sc.nextLine();
+                System.out.print("Enter the Bus Model: ");
+                String busModel = sc.nextLine();
+                ResultSet rs = st.executeQuery(
+                        String.format("SELECT * FROM Bus WHERE BusID = %d  AND busModel = '%s' AND Year = %d", busID,
+                                busModel, busYear));
+                if (rs.next()) {
+                    System.out.println("Bus already exists.\n");
+                    return;
+                }
+
             }
             case 2: {
+
                 break;
             }
             case 3: {
