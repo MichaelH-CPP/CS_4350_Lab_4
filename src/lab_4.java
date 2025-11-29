@@ -11,7 +11,7 @@ public class lab_4 {
 
     public static void printMenu() {
         System.out.println(
-                "Choose an option from below (1-5): \n1. Display Schedule \n2. Edit Drivers \n3.Edit Busses \n4. Edit Trips \n5. Quit");
+                "\nChoose an option from below (1-5): \n1. Display Schedule \n2. Edit Drivers \n3.Edit Busses \n4. Edit Trips \n5. Quit");
     }
 
     public static void displaySchedule(Connection con) throws Exception {
@@ -48,6 +48,8 @@ public class lab_4 {
                                 """, startLoc, dest, date));
                 if (!rs.next()) {
                     System.out.println("No trips were found.\n");
+                    rs.close();
+                    st.close();
                     return;
                 }
                 while (rs.next()) {
@@ -61,7 +63,7 @@ public class lab_4 {
                             rs.getString("DriverName"),
                             rs.getString("BusID"));
                 }
-
+                rs.close();
                 break;
             }
 
@@ -73,12 +75,15 @@ public class lab_4 {
                         tripNum));
                 if (!rs.next()) {
                     System.out.println("No trips were found.\n");
+                    rs.close();
+                    st.close();
                     return;
                 }
                 while (rs.next()) {
                     System.out.printf("Stop #%d: %s%n", rs.getInt("StopNumber"), rs.getString("StopAddress"));
                 }
                 sc.nextLine();
+                rs.close();
 
                 break;
             }
@@ -111,6 +116,8 @@ public class lab_4 {
 
                 if (!rs.next()) {
                     System.out.println("No trips were found.\n");
+                    rs.close();
+                    st.close();
                     return;
                 }
 
@@ -127,19 +134,23 @@ public class lab_4 {
                 break;
             }
             case 4:
+                st.close();
                 return;
-
             default: {
                 System.out.println("\nInvalid Choice. Select an option between 1-4.");
                 displaySchedule(con);
             }
         }
+        st.close();
+
     }
 
     public static void editDrivers(Connection con) throws Exception {
         System.out.println(
                 "\nEdit Drivers: \n1. Add a driver \n2. Change driver for trip (provide Trip Number) \n3. Delete driver \n4. Quit");
         int choice = sc.nextInt();
+        sc.nextLine();
+        Statement st = con.createStatement();
 
         switch (choice) {
             case 1: {
@@ -159,37 +170,108 @@ public class lab_4 {
                 editDrivers(con);
             }
         }
+        st.close();
+
     }
 
     public static void editBusses(Connection con) throws Exception {
         System.out.println(
                 "\nEdit Busses: \n1. Add a bus \n2. Change bus for trip (provide Trip Number) \n3. Delete bus \n4. Quit");
         int choice = sc.nextInt();
+        sc.nextLine();
         Statement st = con.createStatement();
 
         switch (choice) {
             case 1: {
                 System.out.print("Enter the Bus ID: ");
                 int busID = sc.nextInt();
-                System.out.print("Enter the Bus Year: ");
-                int busYear = sc.nextInt();
-                sc.nextLine();
-                System.out.print("Enter the Bus Model: ");
-                String busModel = sc.nextLine();
                 ResultSet rs = st.executeQuery(
-                        String.format("SELECT * FROM Bus WHERE BusID = %d  AND busModel = '%s' AND Year = %d", busID,
-                                busModel, busYear));
+                        String.format("SELECT * FROM Bus WHERE BusID = %d",
+                                busID));
                 if (rs.next()) {
                     System.out.println("Bus already exists.\n");
+                    rs.close();
+                    st.close();
+                    return;
+                }
+                int result = st.executeUpdate("INSERT INTO Bus(BusID, Model, YearOfBus) VALUES(%d,'%s', %d);");
+                if (result == 0) {
+                    System.out.println("Issue with insert.");
+                    rs.close();
+                    st.close();
+                    return;
+                } else {
+                    System.out.println("Insert successful!");
+                }
+                rs.close();
+                break;
+            }
+            case 2: {
+                System.out.print("Enter the trip number: ");
+                int tripNumber = sc.nextInt();
+                ResultSet rs = st.executeQuery(String.format("SELECT * FROM Trip WHERE TripNumber = %d", tripNumber));
+                if (!rs.next()) {
+                    System.out.println("No trip exists for that trip number.");
+                    rs.close();
+                    st.close();
                     return;
                 }
 
-            }
-            case 2: {
+                rs = st.executeQuery(String.format("""
+                            SELECT *
+                        FROM Bus AS b
+                        WHERE b.BusID NOT IN (
+                            SELECT t.BusID
+                            FROM TripOffering AS t
+                            WHERE t.DateOfTrip IN (
+                                SELECT DateOfTrip
+                                FROM TripOffering
+                                WHERE TripNumber = %d
+                            )
+                        );
 
+                        """, tripNumber));
+                if (!rs.next()) {
+                    System.out.println("No available busses");
+                    rs.close();
+                    st.close();
+                    return;
+                }
+                System.out.println("Here is the list of available busses: ");
+                do {
+                    System.out.println(
+                            String.format("BusID: %d, Model: %s, Year: %s", rs.getInt("BusID"), rs.getString("Model"),
+                                    rs.getInt("YearOfBus")));
+                } while (rs.next());
+                System.out.println("Enter the BusID you'd like to choose: ");
+                int busID = sc.nextInt();
+                int result = st.executeUpdate(
+                        String.format("UPDATE TripOffering SET BusID=%d WHERE TripNumber=%d", busID, tripNumber));
+                if (result == 0) {
+                    System.out.println("Update was unsuccesful.");
+                } else {
+                    System.out.println("Update was successful!");
+                }
+                rs.close();
                 break;
             }
             case 3: {
+                System.out.print("Enter the BusID of the bus you'd like to delete: ");
+                int busID = sc.nextInt();
+                ResultSet rs = st.executeQuery(String.format("SELECT * FROM Bus WHERE BusID = %d", busID));
+                if (!rs.next()) {
+                    System.out.println("Bus not found.");
+                    rs.close();
+                    st.close();
+                    return;
+                }
+                int result = st.executeUpdate(String.format("DELETE FROM Bus WHERE BusID=%d", busID));
+                if (result == 0) {
+                    System.out.println("Delete was unsuccesful.");
+                } else {
+                    System.out.println("Delete was successful!");
+                }
+                rs.close();
                 break;
             }
             default: {
@@ -197,6 +279,8 @@ public class lab_4 {
                 editBusses(con);
             }
         }
+        st.close();
+
     }
 
     public static void editTrips(Connection con) throws Exception {
