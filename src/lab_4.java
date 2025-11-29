@@ -154,24 +154,116 @@ public class lab_4 {
 
         switch (choice) {
             case 1: {
+                System.out.print("Enter the driver name: ");
+                String driverName = sc.nextLine();
+                System.out.print("Enter the driver telephone number: ");
+                String phone = sc.nextLine();
 
+                ResultSet rs = st.executeQuery(String.format(
+                        "SELECT * FROM Driver WHERE DriverName = '%s'", driverName));
+                if (rs.next()) {
+                    System.out.println("Driver already exists.\n");
+                    rs.close();
+                    st.close();
+                    return;
+                }
+
+                int result = st.executeUpdate(String.format(
+                        "INSERT INTO Driver(DriverName, DriverTelephoneNumber) VALUES('%s', '%s');",
+                        driverName, phone));
+                if (result == 0) {
+                    System.out.println("Issue with insert.");
+                    rs.close();
+                    st.close();
+                    return;
+                } else {
+                    System.out.println("Driver added successfully!\n");
+                }
+                rs.close();
                 break;
             }
 
             case 2: {
+                System.out.print("Enter the trip number: ");
+                int tripNumber = sc.nextInt();
+                sc.nextLine();
+
+                ResultSet rs = st.executeQuery(String.format(
+                        "SELECT * FROM TripOffering WHERE TripNumber = %d", tripNumber));
+                if (!rs.next()) {
+                    System.out.println("No trip offering exists for that trip number.\n");
+                    rs.close();
+                    st.close();
+                    return;
+                }
+                rs.close();
+
+                rs = st.executeQuery("SELECT * FROM Driver");
+                if (!rs.next()) {
+                    System.out.println("No drivers found.\n");
+                    rs.close();
+                    st.close();
+                    return;
+                }
+
+                System.out.println("Here is the list of available drivers: ");
+                do {
+                    System.out.println(String.format("Name: %s, Phone: %s",
+                            rs.getString("DriverName"),
+                            rs.getString("DriverTelephoneNumber")));
+                } while (rs.next());
+                rs.close();
+
+                System.out.print("Enter the driver name you'd like to assign: ");
+                String newDriver = sc.nextLine();
+
+                int result = st.executeUpdate(String.format(
+                        "UPDATE TripOffering SET DriverName='%s' WHERE TripNumber=%d",
+                        newDriver, tripNumber));
+                if (result == 0) {
+                    System.out.println("Update was unsuccesful.");
+                } else {
+                    System.out.println("Update was successful!");
+                }
                 break;
             }
 
             case 3: {
+                System.out.print("Enter the name of the driver you'd like to delete: ");
+                String driverName = sc.nextLine();
+
+                ResultSet rs = st.executeQuery(String.format(
+                        "SELECT * FROM Driver WHERE DriverName = '%s'", driverName));
+                if (!rs.next()) {
+                    System.out.println("Driver not found.");
+                    rs.close();
+                    st.close();
+                    return;
+                }
+
+                int result = st.executeUpdate(String.format(
+                        "DELETE FROM Driver WHERE DriverName='%s'", driverName));
+                if (result == 0) {
+                    System.out.println("Delete was unsuccesful.");
+                } else {
+                    System.out.println("Delete was successful!");
+                }
+                rs.close();
                 break;
             }
+
+            case 4: {
+                st.close();
+                return;
+            }
+
             default: {
                 System.out.println("\nInvalid Choice. Select an option between 1-3.");
+                st.close();
                 editDrivers(con);
             }
         }
         st.close();
-
     }
 
     public static void editBusses(Connection con) throws Exception {
@@ -185,6 +277,11 @@ public class lab_4 {
             case 1: {
                 System.out.print("Enter the Bus ID: ");
                 int busID = sc.nextInt();
+                sc.nextLine();
+                System.out.print("Enter the Bus Model: ");
+                String model = sc.nextLine();
+                System.out.print("Enter the Bus Year: ");
+                int year = sc.nextInt();
                 ResultSet rs = st.executeQuery(
                         String.format("SELECT * FROM Bus WHERE BusID = %d",
                                 busID));
@@ -194,7 +291,8 @@ public class lab_4 {
                     st.close();
                     return;
                 }
-                int result = st.executeUpdate("INSERT INTO Bus(BusID, Model, YearOfBus) VALUES(%d,'%s', %d);");
+                int result = st.executeUpdate(String
+                        .format("INSERT INTO Bus(BusID, Model, YearOfBus) VALUES(%d,'%s', %d);", busID, model, year));
                 if (result == 0) {
                     System.out.println("Issue with insert.");
                     rs.close();
@@ -286,19 +384,109 @@ public class lab_4 {
     public static void editTrips(Connection con) throws Exception {
         System.out.println("\nEdit Trips: \n1. Add Trip Offering(s) \n2. Delete Trip Offering");
         int choice = sc.nextInt();
+        sc.nextLine();
+        Statement st = con.createStatement();
 
         switch (choice) {
             case 1: {
+                String again = "y";
+                while (again.equalsIgnoreCase("y")) {
+                    System.out.print("Enter the TripNumber: ");
+                    int tripNumber = sc.nextInt();
+                    sc.nextLine();
+
+                    System.out.print("Enter the date of trip (YYYY-MM-DD): ");
+                    String dateStr = sc.nextLine();
+
+                    System.out.print("Enter the scheduled start time (HH:MM:SS): ");
+                    String startTimeStr = sc.nextLine();
+
+                    System.out.print("Enter the scheduled arrival time (HH:MM:SS): ");
+                    String arrivalTimeStr = sc.nextLine();
+
+                    System.out.print("Enter the driver name: ");
+                    String driverName = sc.nextLine();
+
+                    System.out.print("Enter the BusID: ");
+                    int busID = sc.nextInt();
+                    sc.nextLine();
+
+                    ResultSet rs = st.executeQuery(String.format(
+                            "SELECT * FROM TripOffering " +
+                                    "WHERE TripNumber = %d " +
+                                    "AND DateOfTrip = '%s' " +
+                                    "AND ScheduledStartTime = '%s'",
+                            tripNumber, dateStr, startTimeStr));
+                    if (rs.next()) {
+                        System.out.println("Trip offering already exists for that Trip/Date/StartTime.\n");
+                        rs.close();
+                    } else {
+                        rs.close();
+                        int result = st.executeUpdate(String.format(
+                                "INSERT INTO TripOffering(TripNumber, DateOfTrip, ScheduledStartTime, ScheduledArrivalTime, DriverName, BusID) "
+                                        +
+                                        "VALUES(%d, '%s', '%s', '%s', '%s', %d);",
+                                tripNumber, dateStr, startTimeStr, arrivalTimeStr, driverName, busID));
+                        if (result == 0) {
+                            System.out.println("Issue with insert.\n");
+                        } else {
+                            System.out.println("Trip offering added successfully!\n");
+                        }
+                    }
+
+                    System.out.print("Add another trip offering? (y/n): ");
+                    again = sc.nextLine();
+                }
                 break;
             }
+
             case 2: {
+                System.out.print("Enter the TripNumber: ");
+                int tripNumber = sc.nextInt();
+                sc.nextLine();
+
+                System.out.print("Enter the date of trip (YYYY-MM-DD): ");
+                String dateStr = sc.nextLine();
+
+                System.out.print("Enter the scheduled start time (HH:MM:SS): ");
+                String startTimeStr = sc.nextLine();
+
+                ResultSet rs = st.executeQuery(String.format(
+                        "SELECT * FROM TripOffering " +
+                                "WHERE TripNumber = %d " +
+                                "AND DateOfTrip = '%s' " +
+                                "AND ScheduledStartTime = '%s'",
+                        tripNumber, dateStr, startTimeStr));
+                if (!rs.next()) {
+                    System.out.println("Trip offering not found.\n");
+                    rs.close();
+                    st.close();
+                    return;
+                }
+                rs.close();
+
+                int result = st.executeUpdate(String.format(
+                        "DELETE FROM TripOffering " +
+                                "WHERE TripNumber = %d " +
+                                "AND DateOfTrip = '%s' " +
+                                "AND ScheduledStartTime = '%s'",
+                        tripNumber, dateStr, startTimeStr));
+                if (result == 0) {
+                    System.out.println("Delete was unsuccesful.");
+                } else {
+                    System.out.println("Delete was successful!");
+                }
+
                 break;
             }
+
             default: {
                 System.out.println("\nInvalid Choice. Select an option between 1-2.");
+                st.close();
                 editTrips(con);
             }
         }
+        st.close();
     }
 
     public static void main(String[] args) throws Exception {
