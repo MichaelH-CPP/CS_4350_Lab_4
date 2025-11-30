@@ -36,7 +36,7 @@ public class lab_4 {
                                             t.DestinationName,
                                             o.DateOfTrip,
                                             o.ScheduledStartTime,
-                                            o.SecheduledArrivalTime,
+                                            o.ScheduledArrivalTime,
                                             o.DriverName,
                                             o.BusID
                                         FROM Trip AS t
@@ -44,7 +44,7 @@ public class lab_4 {
                                             ON t.TripNumber = o.TripNumber
                                         WHERE t.StartLocationName = '%s'
                                             AND t.DestinationName   = '%s'
-                                            AND o.Date              = '%s';
+                                            AND o.DateofTrip              = '%s';
                                 """, startLoc, dest, date));
                 if (!rs.next()) {
                     System.out.println("No trips were found.\n");
@@ -59,7 +59,7 @@ public class lab_4 {
                             rs.getString("DestinationName"),
                             rs.getString("DateOfTrip"),
                             rs.getString("ScheduledStartTime"),
-                            rs.getString("SecheduledArrivalTime"),
+                            rs.getString("ScheduledArrivalTime"),
                             rs.getString("DriverName"),
                             rs.getString("BusID"));
                 }
@@ -105,7 +105,7 @@ public class lab_4 {
                                     TripNumber,
                                     DateOfTrip,
                                     ScheduledStartTime,
-                                    SecheduledArrivalTime,
+                                    ScheduledArrivalTime,
                                     BusID
                                 FROM TripOffering
                                 WHERE DriverName = '%s'
@@ -127,7 +127,7 @@ public class lab_4 {
                             rs.getString("DateOfTrip"),
                             rs.getInt("TripNumber"),
                             rs.getString("ScheduledStartTime"),
-                            rs.getString("SecheduledArrivalTime"),
+                            rs.getString("ScheduledArrivalTime"),
                             rs.getString("BusID"));
                 }
 
