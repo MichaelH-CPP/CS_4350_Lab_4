@@ -634,7 +634,7 @@ public class lab_4 {
                 default:
                     System.out.println("Invalid Option, choose between 1-5.\n");
             }
-        } while (option != 6);
+        } while (option != 5);
 
         con.close();
         sc.close();
