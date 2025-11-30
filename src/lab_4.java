@@ -381,66 +381,17 @@ public class lab_4 {
 
     }
 
-    public static void editTrips(Connection con) throws Exception {
-        System.out.println("\nEdit Trips: \n1. Add Trip Offering(s) \n2. Delete Trip Offering");
-        int choice = sc.nextInt();
-        sc.nextLine();
-        Statement st = con.createStatement();
+ public static void editTrips(Connection con) throws Exception {
+    System.out.println("\nEdit Trips: \n1. Add Trip Offering(s) \n2. Delete Trip Offering \n3. Record Actual Trip Stop Info \n4. Quit");
+    int choice = sc.nextInt();
+    sc.nextLine();
+    Statement st = con.createStatement();
 
-        switch (choice) {
-            case 1: {
-                String again = "y";
-                while (again.equalsIgnoreCase("y")) {
-                    System.out.print("Enter the TripNumber: ");
-                    int tripNumber = sc.nextInt();
-                    sc.nextLine();
-
-                    System.out.print("Enter the date of trip (YYYY-MM-DD): ");
-                    String dateStr = sc.nextLine();
-
-                    System.out.print("Enter the scheduled start time (HH:MM:SS): ");
-                    String startTimeStr = sc.nextLine();
-
-                    System.out.print("Enter the scheduled arrival time (HH:MM:SS): ");
-                    String arrivalTimeStr = sc.nextLine();
-
-                    System.out.print("Enter the driver name: ");
-                    String driverName = sc.nextLine();
-
-                    System.out.print("Enter the BusID: ");
-                    int busID = sc.nextInt();
-                    sc.nextLine();
-
-                    ResultSet rs = st.executeQuery(String.format(
-                            "SELECT * FROM TripOffering " +
-                                    "WHERE TripNumber = %d " +
-                                    "AND DateOfTrip = '%s' " +
-                                    "AND ScheduledStartTime = '%s'",
-                            tripNumber, dateStr, startTimeStr));
-                    if (rs.next()) {
-                        System.out.println("Trip offering already exists for that Trip/Date/StartTime.\n");
-                        rs.close();
-                    } else {
-                        rs.close();
-                        int result = st.executeUpdate(String.format(
-                                "INSERT INTO TripOffering(TripNumber, DateOfTrip, ScheduledStartTime, ScheduledArrivalTime, DriverName, BusID) "
-                                        +
-                                        "VALUES(%d, '%s', '%s', '%s', '%s', %d);",
-                                tripNumber, dateStr, startTimeStr, arrivalTimeStr, driverName, busID));
-                        if (result == 0) {
-                            System.out.println("Issue with insert.\n");
-                        } else {
-                            System.out.println("Trip offering added successfully!\n");
-                        }
-                    }
-
-                    System.out.print("Add another trip offering? (y/n): ");
-                    again = sc.nextLine();
-                }
-                break;
-            }
-
-            case 2: {
+    switch (choice) {
+        // 1. Add Trip Offering(s)
+        case 1: {
+            String again = "y";
+            while (again.equalsIgnoreCase("y")) {
                 System.out.print("Enter the TripNumber: ");
                 int tripNumber = sc.nextInt();
                 sc.nextLine();
@@ -451,43 +402,208 @@ public class lab_4 {
                 System.out.print("Enter the scheduled start time (HH:MM:SS): ");
                 String startTimeStr = sc.nextLine();
 
+                System.out.print("Enter the scheduled arrival time (HH:MM:SS): ");
+                String arrivalTimeStr = sc.nextLine();
+
+                System.out.print("Enter the driver name: ");
+                String driverName = sc.nextLine();
+
+                System.out.print("Enter the BusID: ");
+                int busID = sc.nextInt();
+                sc.nextLine();
+
                 ResultSet rs = st.executeQuery(String.format(
                         "SELECT * FROM TripOffering " +
                                 "WHERE TripNumber = %d " +
                                 "AND DateOfTrip = '%s' " +
                                 "AND ScheduledStartTime = '%s'",
                         tripNumber, dateStr, startTimeStr));
-                if (!rs.next()) {
-                    System.out.println("Trip offering not found.\n");
+                if (rs.next()) {
+                    System.out.println("Trip offering already exists for that Trip/Date/StartTime.\n");
                     rs.close();
-                    st.close();
-                    return;
-                }
-                rs.close();
-
-                int result = st.executeUpdate(String.format(
-                        "DELETE FROM TripOffering " +
-                                "WHERE TripNumber = %d " +
-                                "AND DateOfTrip = '%s' " +
-                                "AND ScheduledStartTime = '%s'",
-                        tripNumber, dateStr, startTimeStr));
-                if (result == 0) {
-                    System.out.println("Delete was unsuccesful.");
                 } else {
-                    System.out.println("Delete was successful!");
+                    rs.close();
+                    int result = st.executeUpdate(String.format(
+                            "INSERT INTO TripOffering(TripNumber, DateOfTrip, ScheduledStartTime, ScheduledArrivalTime, DriverName, BusID) "
+                                    +
+                                    "VALUES(%d, '%s', '%s', '%s', '%s', %d);",
+                            tripNumber, dateStr, startTimeStr, arrivalTimeStr, driverName, busID));
+                    if (result == 0) {
+                        System.out.println("Issue with insert.\n");
+                    } else {
+                        System.out.println("Trip offering added successfully!\n");
+                    }
                 }
 
-                break;
+                System.out.print("Add another trip offering? (y/n): ");
+                again = sc.nextLine();
+            }
+            break;
+        }
+
+        // 2. Delete Trip Offering
+        case 2: {
+            System.out.print("Enter the TripNumber: ");
+            int tripNumber = sc.nextInt();
+            sc.nextLine();
+
+            System.out.print("Enter the date of trip (YYYY-MM-DD): ");
+            String dateStr = sc.nextLine();
+
+            System.out.print("Enter the scheduled start time (HH:MM:SS): ");
+            String startTimeStr = sc.nextLine();
+
+            ResultSet rs = st.executeQuery(String.format(
+                    "SELECT * FROM TripOffering " +
+                            "WHERE TripNumber = %d " +
+                            "AND DateOfTrip = '%s' " +
+                            "AND ScheduledStartTime = '%s'",
+                    tripNumber, dateStr, startTimeStr));
+            if (!rs.next()) {
+                System.out.println("Trip offering not found.\n");
+                rs.close();
+                st.close();
+                return;
+            }
+            rs.close();
+
+            int result = st.executeUpdate(String.format(
+                    "DELETE FROM TripOffering " +
+                            "WHERE TripNumber = %d " +
+                            "AND DateOfTrip = '%s' " +
+                            "AND ScheduledStartTime = '%s'",
+                    tripNumber, dateStr, startTimeStr));
+            if (result == 0) {
+                System.out.println("Delete was unsuccesful.");
+            } else {
+                System.out.println("Delete was successful!");
             }
 
-            default: {
-                System.out.println("\nInvalid Choice. Select an option between 1-2.");
-                st.close();
-                editTrips(con);
-            }
+            break;
         }
-        st.close();
+
+        // 3. Record Actual Trip Stop Info
+        case 3: {
+            st.close();          // close this Statement
+            recordActualTripInfo(con);  // call the new method
+            return;              // return to main menu
+        }
+
+        // 4. Quit this submenu
+        case 4: {
+            st.close();
+            return;
+        }
+
+        default: {
+            System.out.println("\nInvalid Choice. Select an option between 1-4.");
+        }
     }
+    st.close();
+}
+
+
+    public static void recordActualTripInfo(Connection con) throws Exception {
+    Statement st = con.createStatement();
+
+    System.out.print("Enter the TripNumber: ");
+    int tripNumber = sc.nextInt();
+    sc.nextLine();
+
+    System.out.print("Enter the date of trip (YYYY-MM-DD): ");
+    String dateStr = sc.nextLine();
+
+    System.out.print("Enter the scheduled start time (HH:MM:SS): ");
+    String startTimeStr = sc.nextLine();
+
+  
+    ResultSet rs = st.executeQuery(String.format(
+            "SELECT * FROM TripOffering " +
+            "WHERE TripNumber = %d " +
+            "AND DateOfTrip = '%s' " +
+            "AND ScheduledStartTime = '%s'",
+            tripNumber, dateStr, startTimeStr));
+    if (!rs.next()) {
+        System.out.println("No trip offering found for that trip/date/start time.\n");
+        rs.close();
+        st.close();
+        return;
+    }
+    rs.close();
+
+
+    System.out.print("Enter the StopNumber: ");
+    int stopNumber = sc.nextInt();
+    sc.nextLine();
+
+  
+    rs = st.executeQuery(String.format(
+            "SELECT * FROM TripStopInfo " +
+            "WHERE TripNumber = %d AND StopNumber = %d",
+            tripNumber, stopNumber));
+    if (!rs.next()) {
+        System.out.println("No stop with that StopNumber is defined for this trip.\n");
+        rs.close();
+        st.close();
+        return;
+    }
+    rs.close();
+
+  
+    System.out.print("Enter scheduled arrival time at this stop (HH:MM:SS): ");
+    String schedArrStr = sc.nextLine();
+
+    System.out.print("Enter actual start time at this stop (HH:MM:SS): ");
+    String actualStartStr = sc.nextLine();
+
+    System.out.print("Enter actual arrival time at this stop (HH:MM:SS): ");
+    String actualArrStr = sc.nextLine();
+
+    System.out.print("Enter number of passengers getting ON at this stop: ");
+    int inCount = sc.nextInt();
+    sc.nextLine();
+
+    System.out.print("Enter number of passengers getting OFF at this stop: ");
+    int outCount = sc.nextInt();
+    sc.nextLine();
+
+  
+    rs = st.executeQuery(String.format(
+            "SELECT * FROM ActualTripStopInfo " +
+            "WHERE TripNumber = %d " +
+            "AND DateOfTrip = '%s' " +
+            "AND ScheduledStartTime = '%s' " +
+            "AND StopNumber = %d",
+            tripNumber, dateStr, startTimeStr, stopNumber));
+    if (rs.next()) {
+        System.out.println("Actual trip stop info already exists for this trip/stop.\n");
+        rs.close();
+        st.close();
+        return;
+    }
+    rs.close();
+
+   
+    int result = st.executeUpdate(String.format(
+            "INSERT INTO ActualTripStopInfo " +
+            "(TripNumber, DateOfTrip, ScheduledStartTime, StopNumber, " +
+            " ScheduledArrivalTime, ActualStartTime, ActualArrivalTime, " +
+            " NumberOfPassengerIn, NumberOfPassengerOut) " +
+            "VALUES (%d, '%s', '%s', %d, '%s', '%s', '%s', %d, %d)",
+            tripNumber, dateStr, startTimeStr, stopNumber,
+            schedArrStr, actualStartStr, actualArrStr,
+            inCount, outCount));
+
+    if (result == 0) {
+        System.out.println("Insert was unsuccessful.\n");
+    } else {
+        System.out.println("Actual trip stop info inserted successfully!\n");
+    }
+
+    st.close();
+}
+
+    
 
     public static void main(String[] args) throws Exception {
         Connection con = DriverManager.getConnection(
