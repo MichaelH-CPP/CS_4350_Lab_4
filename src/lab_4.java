@@ -34,7 +34,7 @@ public class lab_4 {
                                     SELECT
                                             t.StartLocationName,
                                             t.DestinationName,
-                                            o.Date,
+                                            o.DateOfTrip,
                                             o.ScheduledStartTime,
                                             o.SecheduledArrivalTime,
                                             o.DriverName,
@@ -57,7 +57,7 @@ public class lab_4 {
                             "%s -> %s on %s | %s - %s | Driver: %s | Bus: %s%n",
                             rs.getString("StartLocationName"),
                             rs.getString("DestinationName"),
-                            rs.getString("Date"),
+                            rs.getString("DateOfTrip"),
                             rs.getString("ScheduledStartTime"),
                             rs.getString("SecheduledArrivalTime"),
                             rs.getString("DriverName"),
@@ -103,7 +103,7 @@ public class lab_4 {
                         """
                                 SELECT
                                     TripNumber,
-                                    Date,
+                                    DateOfTrip,
                                     ScheduledStartTime,
                                     SecheduledArrivalTime,
                                     BusID
@@ -124,7 +124,7 @@ public class lab_4 {
                 while (rs.next()) {
                     System.out.printf(
                             "Date: %s | Trip: %d | %s - %s | Bus: %s%n",
-                            rs.getString("Date"),
+                            rs.getString("DateOfTrip"),
                             rs.getInt("TripNumber"),
                             rs.getString("ScheduledStartTime"),
                             rs.getString("SecheduledArrivalTime"),
